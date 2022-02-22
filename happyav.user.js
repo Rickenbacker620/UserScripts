@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         HappyAV
 // @namespace    rickenbacker620.github.io
-// @version      2.0.1
+// @version      2.0.2
 // @description  javlib tools
 // @author       rickenbacker620
 // @updateURL    https://github.com/Rickenbacker620/UserScripts/raw/master/happyav.user.js
-// @downloadURL    https://github.com/Rickenbacker620/UserScripts/raw/master/happyav.user.js
+// @downloadURL  https://github.com/Rickenbacker620/UserScripts/raw/master/happyav.user.js
 // @match        https://jable.tv/videos/*
 // @match        https://avgle.com/video/*
 // @match        https://www.javlibrary.com/*
