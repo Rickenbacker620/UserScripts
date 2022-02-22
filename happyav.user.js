@@ -5,6 +5,7 @@
 // @description  javlib tools
 // @author       rickenbacker620
 // @updateURL    https://github.com/Rickenbacker620/UserScripts/raw/master/happyav.user.js
+// @downloadURL    https://github.com/Rickenbacker620/UserScripts/raw/master/happyav.user.js
 // @match        https://jable.tv/videos/*
 // @match        https://avgle.com/video/*
 // @match        https://www.javlibrary.com/*
