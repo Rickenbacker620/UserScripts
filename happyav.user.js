@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HappyAV
 // @namespace    rickenbacker620.github.io
-// @version      1.0
+// @version      1.0.1
 // @description  javlib tools
 // @author       rickenbacker620
 // @updateURL    https://github.com/Rickenbacker620/UserScripts/raw/master/happyav.user.js
