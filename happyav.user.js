@@ -8,6 +8,7 @@
 // @downloadURL  https://github.com/Rickenbacker620/UserScripts/raw/master/happyav.user.js
 // @match        https://jable.tv/videos/*
 // @match        https://avgle.com/video/*
+// @match        https://javtrust.com/movie/watch/*
 // @match        https://www.javlibrary.com/*
 // @icon         data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAA7lJREFUWEfFl09oHFUcx7+/N7P//2eXTalFrUVKjaFKymZnFuzBZBUqeqiEngQPpQcV7MGToO25aoOF4smLXiStiDKzUgvFQxLaoCcRL02y2R568LTuZmdn9r0nM2VLtu6/ZDfmXRZ25v2+n/f7935DOOBFB6yPsQDIe/O3AVQo98u7uz3QyADy91dfQIstI0BH6OSt+v8PsDb3KSROUO72OVm5GEJNznoQwvcXTV15OAhodA/cm/8OUixiYroISR8BiDwWJZQg8SOc5rc0db3WDWYcAHUkX1wBMNfztFwepROLm2MHcD4u6urC4ZsIpQ71FFfoDB37wuz1fGgPPCwWs6qivE7AywS8xDmf4YlGLDKrgleS26G5bFWd9CksovrhowRIXgKUJXr+8z/75cFAgPVTp47HJyeLJOWHAJ5rGxOtFqx6HUSEQDgMpqo7ddYl0WLGMK6NlIRlXf8mmkweBVAYZKjH82VIuZgulW7sOgRlXb8VTSbn9yjcsY2I3pswjOtDJ2F5dvaHYDT6lhoIjEPfsyGJ5jOG4XbMTrgn/9jK5y8yRbkcSiRiY1N3AYD7KlExaRjrO+3+Jwk3crlqIBKJBUKhcep7tojInDCMMz0BKrp+1m42b8RSKSh+/9gBHsVCTqVLpcel2eGBSqHwpW1ZHyQyGZCi7A8A0ULaMJbaxjsANjTtV2HbrySyWa++92ldSpvm5a4AZU2rtGz7SDyTAdsvDwBLadNc6A6Qzz9oOc5T0VQK6n7lQD+ATV1f5c1m3m2todhYq3BnNHuHYEvTvnJs+wJjDLF0GsTYyGnQsm3Pm+1f9EvCB6dPa81azb3bEYxEEIxG9wzAOYeiKBCce/lkNxrwu72lXxm6apVCoWxb1tPupnAiAdXn2xNEo1qFPxyGbVlwPeqGVQI/ZUzzzf6dUNNeE7b9s9e5GEMkHscod8J2teoBBKPR3zjwRtY0O+bErsW+mctd45y/3yYNx+OP3LeLZdVqbu/1Qgkp/25a1oXDd+58P/Ayar+wVShcdSzLHUK85RryhUJeXPstN9bKjrC1ms1tx7ZvPrO6+k63fX3bXUXXzzuOc1UK4U26bnf0B4OegJsbT0xBnn03+SAlWo4Dq1ZrMMY+e/bu3U96QQ/st/dnZqZ9qnqlJcScFKLz+ERefL1ylRJCCEghPC1FVZfrQrw9tbbW99tgIECbvKJp02DsPKQ8yTk/LqVMSCG8iYUYa0LKf5iqbrjCKudfH1pZ+WOYlBkaYBhje3nnwAH+BdYqSTDnPaACAAAAAElFTkSuQmCC
 // @grant        GM_setValue
@@ -117,7 +118,7 @@
         document.querySelector(".my-3").appendChild(button)
       ),
       execute: defaultExecute,
-      videoLink: (id) => "https://jable.tv/videos/" + id + "/",
+      videoLink: (id) => `https://jable.tv/videos/${id}/`,
       favicon: "https://assetscdn.jable.tv/assets/icon/favicon-32x32.png",
     },
     {
@@ -135,9 +136,26 @@
         parent.replaceChild(button, parent.firstChild);
       }),
       execute: defaultExecute,
-      videoLink: (id) => "https://avgle.com/search/videos?search_query=" + id,
+      videoLink: (id) => `https://avgle.com/search/videos?search_query=${id}`,
       favicon:
         "https://avgle.com/templates/frontend/bright-blue/img/webapp-icon.png",
+    },
+    {
+      name: "javtrust",
+      regex: /javtrust\.com\/movie/,
+      extractId: function () {
+        const reg = /\b[A-Z, a-z]{3,6}-[0-9]{3,4}\b/;
+        const match = reg.exec(location.href);
+        if (match) return match[0];
+      },
+      appendButton: createAppendButtonFunction((button) => {
+        const parent = document.querySelector(".media");
+        parent.appendChild(button, parent);
+      }),
+      execute: defaultExecute,
+      videoLink: (id) =>
+        `https://javtrust.com/search/movie/${id}.html`,
+      favicon: "https://javtrust.com/favicon-32x32.png",
     },
     {
       name: "javlibrary",
