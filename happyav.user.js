@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HappyAV
 // @namespace    rickenbacker620.github.io
-// @version      2.1.1
+// @version      2.1.2
 // @description  javlib tools
 // @author       rickenbacker620
 // @updateURL    https://github.com/Rickenbacker620/UserScripts/raw/master/happyav.user.js
@@ -123,7 +123,7 @@
       name: "avgle",
       regex: /avgle\.com\/video/,
       extractId: function () {
-        const reg = /\b[A-Z, a-z]{3,6}-[0-9]{3,4}\b/;
+        const reg = /\b[A-Z, a-z]{2,6}-[0-9]{3,4}\b/;
         const match = reg.exec(location.href);
         if (match) return match[0];
       },
@@ -142,7 +142,7 @@
       name: "javtrust",
       regex: /javtrust\.com\/movie/,
       extractId: function () {
-        const reg = /\b[A-Z, a-z]{3,6}-[0-9]{3,4}\b/;
+        const reg = /\b[A-Z, a-z]{2,6}-[0-9]{3,4}\b/;
         const match = reg.exec(location.href);
         if (match) return match[0];
       },
