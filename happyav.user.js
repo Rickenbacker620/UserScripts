@@ -21,38 +21,82 @@
   let curSite;
   let curButton;
 
-  function getElement(parent, selector, timeout = 0) {
-    return new Promise((resolve) => {
-      let result = parent.querySelector(selector);
-      if (result) return resolve(result);
-      let timer;
-      const mutationObserver = window.MutationObserver;
-      const observer = new mutationObserver((mutations) => {
-        for (let mutation of mutations) {
-          for (let addedNode of mutation.addedNodes) {
-            if (addedNode instanceof Element) {
-              result = addedNode.matches(selector)
-                ? addedNode
-                : addedNode.querySelector(selector);
-              if (result) {
-                observer.disconnect();
-                timer && clearTimeout(timer);
-                return resolve(result);
-              }
-            }
-          }
+  function javDBGetDetailPage(javDBId) {
+    GM_xmlhttpRequest({
+      url: `https://javdb.com/v/${javDBId}`,
+      method: "GET",
+      onload: function (response) {
+        const parser = new DOMParser();
+        const htmlDoc = parser.parseFromString(response.responseText, "text/html");
+        const authToken = htmlDoc.querySelector("[name='authenticity_token']").value;
+        const csrfToken = htmlDoc.querySelector("meta[name='csrf-token']").content;
+        const postUrl = `https://javdb.com/v/${javDBId}/reviews/want_to_watch`;
+
+        javDBSendWantedAjax(postUrl, csrfToken, authToken);
+      },
+    });
+  }
+
+  function javDBSendWantedAjax(postUrl, csrfToken, authToken) {
+    GM_xmlhttpRequest({
+      url: postUrl,
+      method: "POST",
+      headers: {
+        "Content-type": "application/x-www-form-urlencoded",
+        "x-csrf-token": csrfToken,
+      },
+      data: `authenticity_token=${encodeURIComponent(authToken)}`,
+      onload: function (response) {
+        if (response.responseText === "window.location.href='/login';") {
+          curButton.innerText = "添加失败,请重试";
+          setTimeout(() => {
+            curButton.innerText = originText;
+            curButton.disabled = false;
+          }, 1000);
+        } else {
+          curButton.innerText = "添加成功";
+          console.log("success");
         }
-      });
-      observer.observe(parent, {
-        childList: true,
-        subtree: true,
-      });
-      if (timeout > 0) {
-        timer = setTimeout(() => {
-          observer.disconnect();
-          return resolve(null);
-        }, timeout);
-      }
+      },
+    });
+  }
+
+  function addToWanted(avId) {
+    GM_xmlhttpRequest({
+      url: `https://javdb.com/search?q=${avId}`,
+      method: "GET",
+      headers: {
+        "Content-type": "application/x-www-form-urlencoded",
+      },
+      onload: function (response) {
+        const parser = new DOMParser();
+        const htmlDoc = parser.parseFromString(response.responseText, "text/html");
+        const linkNode = htmlDoc.querySelector("#videos>.columns>.column>a");
+        let href = "";
+        if (linkNode === null) {
+          console.log(`${avId} not found`);
+          return;
+        } else {
+          href = linkNode.href;
+        }
+        const uid = htmlDoc.querySelector("#videos>.columns>.column>a>.uid").innerHTML;
+        if (avId != uid) console.log("wrong id match");
+        else {
+          const javDBId = href.split("/")[4];
+          javDBGetDetailPage(javDBId);
+        }
+      },
+    });
+  }
+
+  function addStarToFav(detailLink) {
+    GM_xmlhttpRequest({
+      url: detailLink,
+      method: "POST",
+      headers: {
+        "Content-type": "application/x-www-form-urlencoded",
+        "x-csrf-token": "+nkHMzvaLqn3wDNf351JKRKCJgpTbqwzJ8Zj3T8KqlxiK6/Hta1IJdzOtM14v6SSgQdRaDhOObCYsKdA09Kr8A==",
+      },
     });
   }
 
@@ -112,9 +156,7 @@
       extractId: function () {
         return location.href.split("/")[4];
       },
-      appendButton: createAppendButtonFunction((button) =>
-        document.querySelector(".my-3").appendChild(button)
-      ),
+      appendButton: createAppendButtonFunction((button) => document.querySelector(".my-3").appendChild(button)),
       execute: defaultExecute,
       videoLink: (id) => `https://jable.tv/videos/${id}/`,
       favicon: "https://assetscdn.jable.tv/assets/icon/favicon-32x32.png",
@@ -128,15 +170,12 @@
         if (match) return match[0];
       },
       appendButton: createAppendButtonFunction((button) => {
-        const parent = document.querySelector(
-          ".hidden-xs.big-title-truncate.m-t-0"
-        );
+        const parent = document.querySelector(".hidden-xs.big-title-truncate.m-t-0");
         parent.replaceChild(button, parent.firstChild);
       }),
       execute: defaultExecute,
       videoLink: (id) => `https://avgle.com/search/videos?search_query=${id}`,
-      favicon:
-        "https://avgle.com/templates/frontend/bright-blue/img/webapp-icon.png",
+      favicon: "https://avgle.com/templates/frontend/bright-blue/img/webapp-icon.png",
     },
     {
       name: "javtrust",
@@ -151,22 +190,19 @@
         parent.appendChild(button, parent);
       }),
       execute: defaultExecute,
-      videoLink: (id) =>
-        `https://javtrust.com/search/movie/${id}.html`,
+      videoLink: (id) => `https://javtrust.com/search/movie/${id}.html`,
       favicon: "https://javtrust.com/favicon-32x32.png",
     },
     {
-      name: "javlibrary",
-      regex: /javlibrary\.com/,
+      name: "javdb",
+      regex: /javdb\.com/,
       execute: function () {
-        if (location.href.includes("/?v=jav")) {
-          const javId = document.querySelector("#video_id td.text").innerHTML;
-          const infoPanel = document.querySelector("#video_info");
-          const div = document.createElement("div");
-          div.style.display = "inline-flex";
-          div.style.margin = "10px 20px";
-          div.style.gap = "10px";
-          for (const site of sites) {
+        if (location.href.includes("com/v/")) {
+          const javId = document.querySelector(".panel-block.first-block span").innerText;
+          const infoPanel = document.querySelector("#modal-review-watched").previousElementSibling.querySelector(".columns>.column");
+          infoPanel.style.gap = "10px";
+          infoPanel.style.display = "flex";
+          const childrens = sites.flatMap((site) => {
             if (site.videoLink) {
               const image = document.createElement("img");
               image.src = site.favicon;
@@ -178,16 +214,12 @@
               link.target = "_blank";
 
               link.appendChild(image);
-              div.appendChild(link);
+              return [link];
+            } else {
+              return [];
             }
-          }
-          infoPanel.appendChild(div);
-        } else {
-          getElement(document, ".videos").then((_) =>
-            document.querySelectorAll(".video>a") .forEach((e) => (e.target = "_blank"))
-          );
-          const wantedLink = document.querySelector("[href='mv_wanted.php']")
-          if (wantedLink) wantedLink.href = "mv_wanted.php?thumb&sort=added"
+          });
+          infoPanel.replaceChildren(...childrens);
         }
       },
     },
@@ -198,70 +230,6 @@
       curSite = site;
       break;
     }
-  }
-
-  function sendWantedAjax(javlibId) {
-    const originText = curButton.innerText;
-    if (javlibId === undefined) {
-      console.error("javlib id not found");
-    } else {
-      GM_xmlhttpRequest({
-        url: `https://www.javlibrary.com/ajax/ajax_vl_favoriteadd.php`,
-        data: `id=${javlibId}&type=3`,
-        method: "POST",
-        headers: {
-          "Content-type": "application/x-www-form-urlencoded",
-        },
-
-        onload: function (response) {
-          const result = JSON.parse(response.responseText);
-          if (result.ERROR === 2 && result.ID != "") {
-            curButton.innerText = "添加成功";
-          } else {
-            curButton.innerText = "添加失败,请重试";
-            setTimeout(() => {
-              curButton.innerText = originText;
-              curButton.disabled = false;
-            }, 1000);
-          }
-        },
-      });
-    }
-  }
-
-  function addToWanted(avId) {
-    GM_xmlhttpRequest({
-      url: `https://www.javlibrary.com/cn/vl_searchbyid.php?keyword=${avId}`,
-      method: "GET",
-      headers: {
-        "Content-type": "application/x-www-form-urlencoded",
-      },
-      onload: function (response) {
-        const noResult = response.responseText.includes("搜寻没有结果");
-        // const cloudFlare = response.responseText.includes()
-
-        let javlibId;
-
-        if (noResult) {
-          javlibId = undefined;
-        } else if (response.finalUrl.includes("vl_searchbyid")) {
-          const parser = new DOMParser();
-          const htmlDoc = parser.parseFromString(
-            this.responseText,
-            "text/html"
-          );
-          const videos = [...htmlDoc.querySelector(".videos").children];
-          const video = videos.reduce((a, b) =>
-            a.innerText < b.innerText ? a : b
-          );
-          javlibId = video.id.substring(4);
-        } else {
-          javlibId = response.finalUrl.split("?v=")[1];
-        }
-
-        sendWantedAjax(javlibId);
-      },
-    });
   }
 
   curSite.execute();
