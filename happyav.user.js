@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HappyAV
 // @namespace    rickenbacker620.github.io
-// @version      2.1.2
+// @version      2.1.3
 // @description  javlib tools
 // @author       rickenbacker620
 // @updateURL    https://github.com/Rickenbacker620/UserScripts/raw/master/happyav.user.js
@@ -184,19 +184,17 @@
           infoPanel.appendChild(div);
         } else {
           getElement(document, ".videos").then((_) =>
-            document
-              .querySelectorAll(".video>a")
-              .forEach((e) => (e.target = "_blank"))
+            document.querySelectorAll(".video>a") .forEach((e) => (e.target = "_blank"))
           );
+          const wantedLink = document.querySelector("[href='mv_wanted.php']")
+          if (wantedLink) wantedLink.href = "mv_wanted.php?thumb&sort=added"
         }
       },
     },
   ];
 
   for (const site of sites) {
-    console.log(location.href);
     if (site.regex.test(location.href)) {
-      console.log(site);
       curSite = site;
       break;
     }
