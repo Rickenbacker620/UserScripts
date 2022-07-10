@@ -4,6 +4,8 @@
 // @version      0.1
 // @description  remove message in html title
 // @author       rickenbacker620
+// @updateURL    https://github.com/Rickenbacker620/UserScripts/raw/master/fuckmessage.user.js
+// @downloadURL  https://github.com/Rickenbacker620/UserScripts/raw/master/fuckmessage.user.js
 // @match        https://www.zhihu.com/*
 // @match        https://www.csdn.net/*
 // @run-at      document-idle
