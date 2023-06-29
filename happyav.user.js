@@ -63,7 +63,7 @@
 
   function appendVideoSourceButtons(sites) {
     const javId = document.querySelector(".panel-block.first-block span").innerText;
-    const infoPanel = document.querySelector("[href='#magnet-links']").parentElement;
+    const infoPanel = document.querySelector(".movie-panel-info").lastElementChild;
 
     infoPanel.style.gap = "10px";
     infoPanel.style.display = "flex";
@@ -72,6 +72,7 @@
       .filter((site) => site.videoLink)
       .map((site) => {
         const image = document.createElement("img");
+        image.style.padding = "2px"
         image.src = site.favicon;
         image.width = 32;
         image.height = 32;
@@ -79,6 +80,7 @@
         const link = document.createElement("a");
         link.href = site.videoLink(javId);
         link.target = "_blank";
+        link.style.display = "flex"
 
         link.appendChild(image);
         return link;
